@@ -4,7 +4,7 @@ pipeline {
     environment {
         IMAGE_NAME = "student-mgmt-app"
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds') // configure in Jenkins credentials store
-        DOCKERHUB_USER = "your-dockerhub-username"             // <-- change me
+        DOCKERHUB_USER = "tahereemk"             // <-- change me
     }
 
     stages {
