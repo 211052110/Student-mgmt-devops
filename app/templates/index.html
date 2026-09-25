@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Management System</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; }
+  h1 { color: #2c3e50; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+  th { background: #2c3e50; color: white; }
+  form { margin-top: 20px; display: flex; gap: 8px; flex-wrap: wrap; }
+  input { padding: 6px; }
+  button { padding: 6px 12px; background: #2c3e50; color: white; border: none; cursor: pointer; }
+</style>
+</head>
+<body>
+  <h1>Student Management System</h1>
+  <p>Status: <span id="health">checking...</span></p>
+
+  <form id="addForm">
+    <input name="name" placeholder="Name" required>
+    <input name="roll_number" placeholder="Roll Number" required>
+    <input name="branch" placeholder="Branch">
+    <input name="semester" placeholder="Semester" type="number">
+    <button type="submit">Add Student</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Name</th><th>Roll No</th><th>Branch</th><th>Semester</th><th></th></tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+<script>
+async function loadStudents() {
+  const res = await fetch('/students');
+  const data = await res.json();
+  const tbody = document.getElementById('rows');
+  tbody.innerHTML = '';
+  data.forEach(s => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${s.id}</td><td>${s.name}</td><td>${s.roll_number}</td><td>${s.branch||''}</td><td>${s.semester||''}</td>
+      <td><button onclick="del(${s.id})">Delete</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+async function del(id) {
+  await fetch('/students/' + id, { method: 'DELETE' });
+  loadStudents();
+}
+
+document.getElementById('addForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const body = Object.fromEntries(fd.entries());
+  await fetch('/students', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  e.target.reset();
+  loadStudents();
+});
+
+fetch('/health').then(r => r.json()).then(d => {
+  document.getElementById('health').textContent = d.status;
+});
+
+loadStudents();
+</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+---
+- name: Deploy Student Management System container
+  hosts: app_servers
+  become: true
+  vars:
+    image: "your-dockerhub-username/student-mgmt-app:latest"
+    container_name: student-mgmt-app
+    host_port: 5000
+
+  tasks:
+    - name: Ensure Docker is installed
+      apt:
+        name: docker.io
+        state: present
+        update_cache: true
+
+    - name: Ensure Docker service is running
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Pull latest application image
+      docker_image:
+        name: "{{ image }}"
+        source: pull
+
+    - name: Remove existing container (if any)
+      docker_container:
+        name: "{{ container_name }}"
+        state: absent
+
+    - name: Run application container
+      docker_container:
+        name: "{{ container_name }}"
+        image: "{{ image }}"
+        state: started
+        restart_policy: unless-stopped
+        published_ports:
+          - "{{ host_port }}:5000"
+        volumes:
+          - "sms-data:/data"
